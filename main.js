@@ -30,6 +30,8 @@ var cards = [];
 var card_index;
 var entered = [];
 
+var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu $", ".* .* I": "violet", ".* .* V": "indigo", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "clarity", "4 D .*": "cut", "4 D .*": "carat", "4 D .*": "color", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "10 .* O": "why tho", ".* H R": "blood", ".* D R": "blood", ".* S O": "new black", ".* C O": "new black"};
+
 function check(given_card, entered_rules) {
   var matched_rules = [];
   var expected_rules = [];
