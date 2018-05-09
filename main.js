@@ -31,9 +31,16 @@ function toLowerCase(array) {
   }
 }
 
+var nextNumMap = {'A': '1', '1': '2', '2': '3', '3': '4', '4': '5', '5': '6', '6': '7', '7': '8', '8': '9', '9': '10', '10': 'J', 'J': 'Q', 'Q': 'K'};
+function nextNum(num) {
+  return nextNumMap[num];
+}
+
 var nums = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 var suits = ['S', 'H', 'D', 'C'];
 var colors = ['R', 'G', 'B'];
+colors.sort();
+var all_colors = colors.join('');
 var total_num = nums.length * suits.length * colors.length;
 var cards = [];
 var done_cards = [];
@@ -41,6 +48,7 @@ var entered = [];
 var answer = "FAKE";
 var autocompletes = [];
 var card_history = [];
+var clear_history = false;
 
 var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* D .*": "$$$", ".* C .*": "night", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu ^", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "SPECIAL CODE CASE", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "J .* R": "joker", "4 .* G": "phone", "10 .* G": "why tho", "J .* G": "lantern", "Q .* G": "gaia", "A .* B": "captain", "K .* B": "poseidon", ".* H R": "blood", ".* D R": "blood", ".* S G": "garden", ".* H B": "rose", ".* C B": "jazzy"};
 
@@ -48,20 +56,22 @@ function displayExpected(expected_rules) {
   $('#feedback').text("Failed! Expected: " + expected_rules.join(", ").toUpperCase());
 }
 
+function split(card) {
+  var split = card.split(' ');
+  return {num: split[0], suit: split[1], color: split[2]};
+}
+
 function check(given_card, entered_rules) {
   var matched_rules = [];
   var expected_rules = [];
 
-  var split_card = given_card.split(' ');
-  var given_num = split_card[0];
-  var given_suit = split_card[1];
-  var given_color = split_card[2];
+  var split_card = split(given_card);
 
   for (var card in rules) {
     var expected = rules[card];
     if (RegExp(card, 'gi').test(given_card) && expected != '') {
       matched_rules.push(card);
-      expected = expected.replace('#', given_num).replace('^', given_suit).replace('%', given_color);
+      expected = expected.replace('#', split_card.num).replace('^', split_card.suit).replace('%', split_card.color);
       if (card == "4 D .*") {
 	expected_rules.push('cut');
 	expected_rules.push('clarity');
@@ -69,6 +79,27 @@ function check(given_card, entered_rules) {
 	expected_rules.push('color');
       } else {
 	expected_rules.push(expected);
+      }
+    }
+  }
+
+  if (card_history.length >= 1) {
+    last_card = split(card_history[card_history.length - 1]);
+    if (nextNum(last_card.num) == split_card.num || nextNum(split_card.num) == last_card.num) {
+      expected_rules.push('off by one');
+    }
+    if (last_card.num == split_card.num || last_card.suit == split_card.suit) {
+      expected_rules.push('match');
+    }
+    if (card_history.length >= 2) {
+      last_last_card = split(card_history[card_history.length - 2]);
+      if (last_last_card.num == split_card.num) {
+	expected_rules.push('sandwich');
+      }
+      var last_colors = [split_card.color, last_card.color, last_last_card.color];
+      last_colors.sort();
+      if (last_colors.join('') == all_colors) {
+	expected_rules.push('colorful');
       }
     }
   }
@@ -124,6 +155,7 @@ $(document).ready(function() {
   });
 
   $('#next').click(function() {
+    if (clear_history) { $('#card_history').html(''); }
     $('#input').autocomplete('close');
     console.log("Input is:");
     console.log(cards[0]);
@@ -169,11 +201,15 @@ $(document).ready(function() {
       $('#card').text(cards[0]);
       $('#progress').text(cards.length);
       $('#clear').click();
-      $('#card_history').html('');
+      if (history.length > 0) {
+	$('#card_history').append('HISTORY ABOUT TO BE CLEARED');
+      }
+      clear_history = true;
     }
   });
 
   $('#clear').click(function() {
+    if (clear_history) { $('#card_history').html(''); }
     entered = [];
     $('#entered').html('');
     $('#input').val('');
@@ -181,6 +217,7 @@ $(document).ready(function() {
   });
 
   $('#enter').click(function() {
+    if (clear_history) { $('#card_history').html(''); }
     $('#input').autocomplete('close');
     var input = $('#input').val();
     $('#feedback').html('');
