@@ -107,6 +107,9 @@ $(document).ready(function() {
   });
 
   $('#next').click(function() {
+    console.log("Input is:");
+    console.log(cards[0]);
+    console.log(entered);
     if (check(cards[0], entered)) {
       entered = [];
       $('#entered').html('');
