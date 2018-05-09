@@ -27,10 +27,14 @@ var nums = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 var suits = ['S', 'H', 'D', 'C'];
 var colors = ['R', 'O', 'Y', 'G', 'B', 'I', 'V'];
 var cards = [];
-var card_index;
+var done_cards = [];
 var entered = [];
 
 var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu $", ".* .* I": "violet", ".* .* V": "indigo", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "clarity", "4 D .*": "cut", "4 D .*": "carat", "4 D .*": "color", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "10 .* O": "why tho", ".* H R": "blood", ".* D R": "blood", ".* S O": "new black", ".* C O": "new black"};
+
+function displayExpected(expected_rules) {
+  $('#feedback').text("Failed! Expected: " + expected_rules.join(", ").toUpperCase());
+}
 
 function check(given_card, entered_rules) {
   var matched_rules = [];
@@ -46,16 +50,24 @@ function check(given_card, entered_rules) {
     if (RegExp(card, 'gi').test(given_card) && expected != '') {
       matched_rules.push(card);
       expected = expected.replace('#', given_num).replace('$', given_suit).replace('%', given_color);
-      expected_rules.push(expected);
+      if (card == "4 D .*") {
+	expected_rules.push('cut');
+	expected_rules.push('clarity');
+	expected_rules.push('carat');
+	expected_rules.push('color');
+      } else {
+	expected_rules.push(expected);
+      }
     }
   }
 
   console.log('CHECK:');
   console.log(matched_rules);
   console.log(expected_rules);
-  console.log(entered);
+  console.log(entered_rules);
 
   if (expected_rules.length != entered_rules.length) {
+    displayExpected(expected_rules);
     return false;
   }
   toLowerCase(expected_rules);
@@ -64,6 +76,7 @@ function check(given_card, entered_rules) {
   entered_rules.sort();
   for (var i = 0; i < entered_rules.length; i++) {
     if (expected_rules[i] != entered_rules[i]) {
+      displayExpected(expected_rules);
       return false;
     }
   }
@@ -84,40 +97,59 @@ $(document).ready(function() {
   shuffle(cards);
   console.log(cards);
 
-  card_index = 0;
-  $('#card').text(cards[card_index]);
+  $('#card').text(cards[0]);
+  $('#progress').text(cards.length);
 
   $('#input').keyup(function(event) {
     if (event.keyCode === 13) {
-      $('#button').click();
+      $('#enter').click();
     }
   });
 
-  $('#button').click(function() {
-    var input = $('#input').val();
-    $('#feedback').html(' ');
-    if (input == 'clear' || input == 'c') {
+  $('#next').click(function() {
+    if (check(cards[0], entered)) {
       entered = [];
       $('#entered').html('');
-    } else if (input == 'next' || input == 'n') {
-      if (check(cards[card_index], entered)) {
-	entered = [];
-	$('#entered').html('');
-	card_index ++;
-	$('#card').text(cards[card_index]);
-	$('#feedback').text('Success!');
+      done_cards.push(cards.shift());
+      if (cards.length == 0) {
+	$('#feedback').text('You won!');
+	$('#enter').click(function() {});
       } else {
-	$('#feedback').text('Failed!');
+	$('#card').text(cards[0]);
+	$('#progress').text(cards.length);
+	$('#feedback').text('Success!');
       }
+    } else {
+      var num_penalty = Math.min(10, done_cards.length);
+      $('#feedback').append(" for " + cards[0] + ". Penalty of " + num_penalty + (num_penalty == 1 ? " card." : " cards."));
+      for (var i = 0; i < num_penalty; i++) {
+	cards.push(done_cards.splice(Math.floor(Math.random() * done_cards.length), 1));
+      }
+      shuffle(cards);
+      $('#card').text(cards[0]);
+      $('#progress').text(cards.length);
+      entered = [];
+      $('#entered').html('');
+    }
+  });
+
+  $('#clear').click(function() {
+    entered = [];
+    $('#entered').html('');
+  });
+
+  $('#enter').click(function() {
+    var input = $('#input').val();
+    $('#feedback').html(' ');
+    if (input.toLowerCase() == 'clear' || input.toLowerCase() == 'c') {
+      $('#clear').click();
+    } else if (input.toLowerCase() == 'next' || input.toLowerCase() == 'n') {
+      $('#next').click();
     } else if (input != '') {
       entered.push(input);
-      $('#entered').html($('#entered').html() + input + '</br>');
+      $('#entered').append(input + '</br>');
     }
     $('#input').val('');
-
-    if (card_index == cards.length) {
-      $('#feedback').text('You won!');
-      $('#button').click(function() {});
-    }
+    $('#input').focus();
   });
 });
