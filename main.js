@@ -1,3 +1,11 @@
+// Overrides the default autocomplete filter function to search only from the beginning of the string
+$.ui.autocomplete.filter = function (array, term) {
+    var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(term), "i");
+    return $.grep(array, function (value) {
+        return matcher.test(value.label || value.value || value);
+    });
+};
+
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -29,8 +37,10 @@ var colors = ['R', 'O', 'Y', 'G', 'B', 'I', 'V'];
 var cards = [];
 var done_cards = [];
 var entered = [];
+var answer = "FAKE";
+var autocompletes = [];
 
-var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu $", ".* .* I": "violet", ".* .* V": "indigo", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "clarity", "4 D .*": "cut", "4 D .*": "carat", "4 D .*": "color", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "10 .* O": "why tho", ".* H R": "blood", ".* D R": "blood", ".* S O": "new black", ".* C O": "new black"};
+var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu $", ".* .* I": "violet", ".* .* V": "indigo", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "clarity", "4 D .*": "cut", "4 D .*": "carat", "4 D .*": "color", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "10 .* O": "why tho", ".* H R": "blood", ".* D R": "blood", ".* S O": "new black", ".* C O": "new black", ".* S Y": "bee", ".* C Y": "bee", ".* H G": "blind", ".* D G": "blind"};
 
 function displayExpected(expected_rules) {
   $('#feedback').text("Failed! Expected: " + expected_rules.join(", ").toUpperCase());
@@ -80,6 +90,9 @@ function check(given_card, entered_rules) {
       return false;
     }
   }
+  for (var i = 0; i < entered_rules.length; i++) {
+    autocompletes.push(entered_rules[i]);
+  }
   return true;
 }
 
@@ -100,6 +113,7 @@ $(document).ready(function() {
   $('#card').text(cards[0]);
   $('#progress').text(cards.length);
 
+  $('#input').autocomplete({ source: autocompletes, delay: 0 });
   $('#input').keyup(function(event) {
     if (event.keyCode === 13) {
       $('#enter').click();
@@ -107,6 +121,7 @@ $(document).ready(function() {
   });
 
   $('#next').click(function() {
+    $('#input').autocomplete('close');
     console.log("Input is:");
     console.log(cards[0]);
     console.log(entered);
@@ -147,17 +162,19 @@ $(document).ready(function() {
       shuffle(cards);
       $('#card').text(cards[0]);
       $('#progress').text(cards.length);
-      entered = [];
-      $('#entered').html('');
+      $('#clear').click();
     }
   });
 
   $('#clear').click(function() {
     entered = [];
     $('#entered').html('');
+    $('#input').val('');
+    $('#input').autocomplete('close');
   });
 
   $('#enter').click(function() {
+    $('#input').autocomplete('close');
     var input = $('#input').val();
     $('#feedback').html('');
     if (input.toLowerCase() == 'clear' || input.toLowerCase() == 'c') {
