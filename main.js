@@ -112,15 +112,31 @@ $(document).ready(function() {
       $('#entered').html('');
       done_cards.push(cards.shift());
       if (cards.length == 0) {
-	$('#feedback').text('You won!');
-	$('#enter').click(function() {});
+	$('#feedback').text("Failed! You didn't say LAST CARD. Penalty of 363 cards.");
+	$('#card').text("A H B");
+	$('#progress').text(364);
+	$('#next').off('click');
+	$('#enter').off('click');
+	$('#clear').off('click');
+	$('#next').click(function() {
+	  $('#feedback').text("Just kidding, you won! The answer is TODO!");
+	  $('#next').off('click');
+	  $('#enter').off('click');
+	  $('#clear').off('click');
+	});
+	$('#enter').click(function() {
+	  $('#next').click();
+	});
+	$('#clear').click(function() {
+	  $('#next').click();
+	});
       } else {
 	$('#card').text(cards[0]);
 	$('#progress').text(cards.length);
 	$('#feedback').text('Success!');
       }
     } else {
-      var num_penalty = Math.min(10, done_cards.length);
+      var num_penalty = Math.min(5, done_cards.length);
       $('#feedback').append(" for " + cards[0] + ". Penalty of " + num_penalty + (num_penalty == 1 ? " card." : " cards."));
       for (var i = 0; i < num_penalty; i++) {
 	cards.push(done_cards.splice(Math.floor(Math.random() * done_cards.length), 1));
@@ -140,7 +156,7 @@ $(document).ready(function() {
 
   $('#enter').click(function() {
     var input = $('#input').val();
-    $('#feedback').html(' ');
+    $('#feedback').html('');
     if (input.toLowerCase() == 'clear' || input.toLowerCase() == 'c') {
       $('#clear').click();
     } else if (input.toLowerCase() == 'next' || input.toLowerCase() == 'n') {
