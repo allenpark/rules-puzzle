@@ -33,14 +33,16 @@ function toLowerCase(array) {
 
 var nums = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 var suits = ['S', 'H', 'D', 'C'];
-var colors = ['R', 'O', 'Y', 'G', 'B', 'I', 'V'];
+var colors = ['R', 'G', 'B'];
+var total_num = nums.length * suits.length * colors.length;
 var cards = [];
 var done_cards = [];
 var entered = [];
 var answer = "FAKE";
 var autocompletes = [];
+var card_history = [];
 
-var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu $", ".* .* I": "violet", ".* .* V": "indigo", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "clarity", "4 D .*": "cut", "4 D .*": "carat", "4 D .*": "color", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "10 .* O": "why tho", ".* H R": "blood", ".* D R": "blood", ".* S O": "new black", ".* C O": "new black", ".* S Y": "bee", ".* C Y": "bee", ".* H G": "blind", ".* D G": "blind"};
+var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* D .*": "$$$", ".* C .*": "night", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu ^", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "SPECIAL CODE CASE", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "J .* R": "joker", "4 .* G": "phone", "10 .* G": "why tho", "J .* G": "lantern", "Q .* G": "gaia", "A .* B": "captain", "K .* B": "poseidon", ".* H R": "blood", ".* D R": "blood", ".* S G": "garden", ".* H B": "rose", ".* C B": "jazzy"};
 
 function displayExpected(expected_rules) {
   $('#feedback').text("Failed! Expected: " + expected_rules.join(", ").toUpperCase());
@@ -59,7 +61,7 @@ function check(given_card, entered_rules) {
     var expected = rules[card];
     if (RegExp(card, 'gi').test(given_card) && expected != '') {
       matched_rules.push(card);
-      expected = expected.replace('#', given_num).replace('$', given_suit).replace('%', given_color);
+      expected = expected.replace('#', given_num).replace('^', given_suit).replace('%', given_color);
       if (card == "4 D .*") {
 	expected_rules.push('cut');
 	expected_rules.push('clarity');
@@ -97,6 +99,7 @@ function check(given_card, entered_rules) {
 }
 
 $(document).ready(function() {
+  $('#total').text(total_num);
   for (var i = 0; i < nums.length; i++) {
     var num = nums[i];
     for (var j = 0; j < suits.length; j++) {
@@ -128,11 +131,13 @@ $(document).ready(function() {
     if (check(cards[0], entered)) {
       entered = [];
       $('#entered').html('');
+      card_history.push(cards[0]);
+      $('#card_history').append(cards[0] + "<br/>");
       done_cards.push(cards.shift());
       if (cards.length == 0) {
-	$('#feedback').text("Failed! You didn't say LAST CARD. Penalty of 363 cards.");
+	$('#feedback').text("Failed! You didn't say LAST CARD. Penalty of " + (total_num - 1) + " cards.");
 	$('#card').text("A H B");
-	$('#progress').text(364);
+	$('#progress').text(total_num);
 	$('#next').off('click');
 	$('#enter').off('click');
 	$('#clear').off('click');
@@ -160,9 +165,11 @@ $(document).ready(function() {
 	cards.push(done_cards.splice(Math.floor(Math.random() * done_cards.length), 1));
       }
       shuffle(cards);
+      card_history = [];
       $('#card').text(cards[0]);
       $('#progress').text(cards.length);
       $('#clear').click();
+      $('#card_history').html('');
     }
   });
 
