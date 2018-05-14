@@ -191,7 +191,7 @@ $(document).ready(function() {
 	$('#feedback').text('Success!');
       }
     } else {
-      var num_penalty = Math.min(2, done_cards.length);
+      var num_penalty = Math.min(0, done_cards.length);
       $('#feedback').append(" for " + cards[0] + ". Penalty of " + num_penalty + (num_penalty == 1 ? " card." : " cards."));
       for (var i = 0; i < num_penalty; i++) {
 	cards.push(done_cards.splice(Math.floor(Math.random() * done_cards.length), 1));
