@@ -50,7 +50,7 @@ var autocompletes = [];
 var card_history = [];
 var clear_history = false;
 
-var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* D .*": "$$$", ".* C .*": "night", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu ^", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "SPECIAL CODE CASE", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "7 .* R": "game", "J .* R": "joker", "4 .* G": "phone", "10 .* G": "why tho", "J .* G": "lantern", "Q .* G": "gaia", "A .* B": "captain", "K .* B": "poseidon", ".* H R": "blood", ".* D R": "blood", ".* S G": "garden", ".* H B": "rose", ".* C B": "jazzy"};
+var rules = {"A .* .*": "uno", "2 .* .*": "deuce", "3 .* .*": "charm", "4 .* .*": "crowd", "5 .* .*": "handful", "7 .* .*": "lucky", "8 .* .*": "ate", "10 .* .*": "countdown", "J .* .*": "royal", "Q .* .*": "royal", "K .* .*": "royal", ".* S .*": "# of spades", ".* H .*": "love", ".* D .*": "$$$", ".* C .*": "night", ".* .* R": "rage", ".* .* G": "tea", ".* .* B": "blu ^", "A S .*": "prime", "Q S .*": "13 points", "A H .*": "<3", "2 H .*": "<3 <3", "3 H .*": "<3 <3 <3", "Q H .*": "off with her head", "4 D .*": "SPECIAL CODE CASE", "J D .*": "rich", "Q D .*": "richer", "K D .*": "richest", "A C .*": "odd", "2 C .*": "even", "3 C .*": "odd", "4 C .*": "even", "5 C .*": "odd", "6 C .*": "even", "7 C .*": "odd", "8 C .*": "even", "9 C .*": "odd", "10 C .*": "even", "J C .*": "odd", "Q C .*": "even", "K C .*": "odd", "4 .* G": "phone", "10 .* G": "why tho", "K .* B": "poseidon", ".* H R": "blood", ".* D R": "blood", ".* S G": "garden"};
 
 function displayExpected(expected_rules) {
   $('#feedback').text("Failed! Expected: " + expected_rules.join(", ").toUpperCase());
@@ -191,7 +191,7 @@ $(document).ready(function() {
 	$('#feedback').text('Success!');
       }
     } else {
-      var num_penalty = Math.min(5, done_cards.length);
+      var num_penalty = Math.min(2, done_cards.length);
       $('#feedback').append(" for " + cards[0] + ". Penalty of " + num_penalty + (num_penalty == 1 ? " card." : " cards."));
       for (var i = 0; i < num_penalty; i++) {
 	cards.push(done_cards.splice(Math.floor(Math.random() * done_cards.length), 1));
